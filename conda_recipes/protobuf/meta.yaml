@@ -1,0 +1,37 @@
+package:
+  name: protobuf
+  version: "{{ environ.get('PROTO_BUILD_VERSION') }}"
+
+source:
+  url: https://github.com/google/protobuf/archive/v{{ PROTO_BUILD_VERSION }}/protobuf-v{{ PROTO_BUILD_VERSION }}.tar.gz
+
+requirements:
+  build:
+    - automake
+    - libtool
+    - unzip
+    - zlib
+  run:
+    - zlib
+    - unzip
+
+build:
+  number: {{ environ.get('PROTO_BUILD_NUMBER') }}
+  skip: true  # [win]
+
+test:
+  commands:
+    - which protoc
+    - protoc --help
+    - protoc --version
+    - test -f ${PREFIX}/lib/libprotobuf.a
+    - test -f ${PREFIX}/lib/libprotobuf.so
+
+about:
+  home: https://developers.google.com/protocol-buffers/
+  license: BSD 3-Clause
+  summary: Protocol Buffers - Google's data interchange format
+
+extra:
+  recipe-maintainers:
+    - prigoyal
