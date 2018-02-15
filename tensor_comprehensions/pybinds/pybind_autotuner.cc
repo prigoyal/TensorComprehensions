@@ -26,7 +26,7 @@
 
 #include "pybind_utils.h"
 #include "tc/autotuner/genetic_autotuner_aten.h"
-#include "tc/core/gflags.h"
+#include "tc/core/flags.h"
 #include "tc/core/mapping_options.h"
 
 namespace tc {

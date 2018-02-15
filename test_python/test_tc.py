@@ -27,14 +27,14 @@ if not os.path.exists(PATH_PREFIX):
     os.makedirs(PATH_PREFIX)
 
 
-class ChannelContractionTest(TestCase):
+class TensorDotTest(TestCase):
     def build_tc_problem(self):
         lang = """
-        def channel_contraction(float(N, C1, C2, H, W) I0, float(N, C2, C3, H, W) I1) -> (O) {
+        def tensordot(float(N, C1, C2, H, W) I0, float(N, C2, C3, H, W) I1) -> (O) {
           O(n, c1, c3, h, w) +=! I0(n, c1, c2, h, w) * I1(n, c2, c3, h, w)
         }
         """
-        tc_name = "channel_contraction"
+        tc_name = "tensordot"
         tc_type = "conv"
 
         N = 32
@@ -43,21 +43,21 @@ class ChannelContractionTest(TestCase):
         C3 = 2
         H = 28
         W = 28
-        cache_filename = "{}/channel_contraction_cache_N_{}_C1_{}_C2_{}_C3_{}_H_{}_W{}".format(
+        cache_filename = "{}/tensordot_cache_N_{}_C1_{}_C2_{}_C3_{}_H_{}_W{}".format(
             PATH_PREFIX, N, C1, C2, C3, H, W)
         I0 = torch.randn(N, C1, C2, H, W).cuda()
         I1 = torch.randn(N, C2, C3, H, W).cuda()
         inputs = [I0, I1]
         return lang, tc_name, tc_type, cache_filename, inputs
 
-    def test_channel_contraction_autotune_first(self):
+    def test_tensordot_autotune_first(self):
         lang, tc_name, tc_type, cache_filename, inputs = self.build_tc_problem()
         print("\n====> Autotuning kernel and saving results")
         options = self.autotune_store(cache_filename, lang, tc_name, inputs, tc_type)
         print("\n====> Running the kernel with autotuned options")
         self.check(lang, tc_name, options, inputs, outputs=None)
 
-    def test_channel_contraction_autotune_load(self):
+    def test_tensordot_autotune_load(self):
         lang, tc_name, tc_type, cache_filename, inputs = self.build_tc_problem()
         print("\n====> Loading the autotuned options")
         options = self.autotune_load(cache_filename, lang, tc_name, inputs)

@@ -20,8 +20,10 @@ from tensor_comprehensions.tc_unit import GlobalDebugInit
 from tensor_comprehensions.tc_unit import autotuner_default_options
 from tensor_comprehensions.tc_unit import small_size_autotuner_options
 from tensor_comprehensions.tc_unit import ATenCompilationUnit
+from tensor_comprehensions.mapping_options import Options
 
 __all__ = [
     'define', 'TcAutotuner', 'TcCompilationUnit', 'autotuner_default_options',
     'small_size_autotuner_options', 'GlobalDebugInit', 'ATenCompilationUnit',
+    'Options',
 ]

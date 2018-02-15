@@ -12,8 +12,8 @@ conda config --set anaconda_upload no
 ##############################################################################
 # ISL settings
 ISL_TC_BUILD_VERSION="0.2.1"
-ISL_TC_BUILD_NUMBER=1
-ISL_TC_GIT_HASH="67f217662681e479bc1d143a5da9caaa5ed501a1"
+ISL_TC_BUILD_NUMBER=2
+ISL_TC_GIT_HASH="68e36add28a5e2018c24ff0f04d54d96359fba95"
 
 echo "Packaging ISL-TC first"
 echo "ISL_TC_BUILD_VERSION: ${ISL_TC_BUILD_VERSION} ISL_TC_BUILD_NUMBER: ${ISL_TC_BUILD_NUMBER}"
@@ -108,9 +108,9 @@ echo "HALIDE packaged Successfully"
 ###############################################################################
 # Tensor Comprehensions settings
 TC_BUILD_VERSION="0.2.1"
-TC_BUILD_NUMBER=1
+TC_BUILD_NUMBER=2
 # TAG: tc-v0.2.1
-TC_GIT_HASH="101ed677f87f59f0da73c718a4c4d44ae3e6d6b5"
+TC_GIT_HASH="e012dc9138a7e31229c9af40c5538eb298fa73be"
 
 echo "Packaging TC ==> TC_BUILD_VERSION: ${TC_BUILD_VERSION} TC_BUILD_NUMBER: ${TC_BUILD_NUMBER}"
 
@@ -118,7 +118,6 @@ export TC_BUILD_VERSION=$TC_BUILD_VERSION
 export TC_BUILD_NUMBER=$TC_BUILD_NUMBER
 export TC_GIT_HASH=$TC_GIT_HASH
 
-# We specify channel `soumith` because that contains the pytorch v0.3.1 package we need
-time conda build -c soumith --python 3.6 tensor_comprehensions --keep-old-work --no-remove-work-dir
+time conda build -c pytorch --python 3.6 tensor_comprehensions --keep-old-work --no-remove-work-dir
 
 echo "Tensor Comprehensions packaged Successfully"

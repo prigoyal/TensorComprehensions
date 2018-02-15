@@ -6,7 +6,8 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = TensorComprehensions
 SOURCEDIR     = source
-BUILDDIR      = build
+# TODO: (prigoyal) change c2isl -> TensorComprehensions before regenerating docs
+BUILDDIR      = ../../c2isl-docs
 
 # Put it first so that "make" without argument is like "make help".
 help:

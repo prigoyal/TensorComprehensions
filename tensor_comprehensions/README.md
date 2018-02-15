@@ -23,7 +23,7 @@ which g++
 export CC=$(which gcc)
 export CXX=$(which g++)
 export LLVM_SOURCES=/tmp/llvm_sources-tapir5.0
-export CLANG_PREFIX=/usr/local/clang+llvm-tapir5.0  # change this to whatever path you want
+export CLANG_PREFIX=$HOME/clang+llvm-tapir5.0  # change this to whatever path you want
 export CMAKE_VERSION=cmake
 
 mkdir -p $LLVM_SOURCES
@@ -36,11 +36,9 @@ mkdir -p ${LLVM_SOURCES}/llvm_build && cd ${LLVM_SOURCES}/llvm_build
 # cmake and install
 ${CMAKE_VERSION} -DCMAKE_INSTALL_PREFIX=${CLANG_PREFIX} -DLLVM_TARGETS_TO_BUILD=X86 -DCOMPILER_RT_BUILD_CILKTOOLS=OFF -DLLVM_ENABLE_CXX1Y=ON -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_ENABLE_ASSERTIONS=ON -DCMAKE_BUILD_TYPE=Release -DLLVM_BUILD_LLVM_DYLIB=ON  -DLLVM_ENABLE_RTTI=ON ../llvm/
 
-make -j"$(nproc)" -s
-make install -j"$(nproc)" -s
+make -j"$(nproc)" -s && make install -j"$(nproc)" -s
 
-cd /usr/local
-rm -rf $LLVM_SOURCES
+cd $HOME && rm -rf $LLVM_SOURCES
 ```
 
 ### **Step 2:** Install Anaconda3
@@ -48,17 +46,17 @@ In order to contribute to TC python/C++ API, you need to install TC from source.
 anaconda3 is required. Install anaconda3 by following the instructions below:
 
 ```Shell
-cd /usr/local
+cd $HOME
 wget https://repo.continuum.io/archive/Anaconda3-5.0.1-Linux-x86_64.sh -O anaconda3.sh
 chmod +x anaconda3.sh
-./anaconda3.sh -b -p /usr/local/anaconda3
+./anaconda3.sh -b -p $HOME/anaconda3
 rm anaconda3.sh
 ```
 
 Now add anaconda3 to your PATH so that you can use it. For that run the following command:
 
 ```Shell
-export PATH=/usr/local/anaconda3/bin:$PATH
+export PATH=$HOME/anaconda3/bin:$PATH
 ```
 
 Now, verify your conda installation and check the version:
@@ -108,13 +106,13 @@ sudo apt-get -y install cuda
 CUDNN_TAR_FILE="cudnn-8.0-linux-x64-v6.0.tgz"
 wget http://developer.download.nvidia.com/compute/redist/cudnn/v6.0/${CUDNN_TAR_FILE}
 tar -xzvf ${CUDNN_TAR_FILE}
-sudo cp -P cuda/include/cudnn.h /usr/local/cuda-8.0/include
-sudo cp -P cuda/lib64/libcudnn* /usr/local/cuda-8.0/lib64/
-sudo chmod a+r /usr/local/cuda-8.0/lib64/libcudnn*
+sudo cp -P cuda/include/cudnn.h /usr/local/cuda/include
+sudo cp -P cuda/lib64/libcudnn* /usr/local/cuda/lib64/
+sudo chmod a+r /usr/local/cuda/lib64/libcudnn*
 
 # set environment variables
-export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64:$LD_LIBRARY_PATH
-export PATH=/usr/local/bin:/usr/local/cuda-8.0/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+export PATH=/usr/local/bin:/usr/local/cuda/bin:$PATH
 ```
 
 ### **Step 5:** Installing TC
@@ -123,7 +121,7 @@ Now, you need to install TC from source (conda packages coming soon). For instal
 TC from source, checkout the c2isl repo and run the following commands:
 
 ```Shell
-cd /usr/local && git clone git@github.com:nicolasvasilache/c2isl.git --recursive
+cd $HOME && git clone git@github.com:nicolasvasilache/c2isl.git --recursive
 cd c2isl
 git submodule update --init --recursive
 export CC=$(which gcc)
@@ -145,7 +143,7 @@ Now, let's run the TC installation.
 
 ```Shell
 # you set the CLANG_PREFIX variable in your CLANG+LLVM install above, use that
-WITH_PYTHON_C2=OFF CLANG_PREFIX=/usr/local/clang+llvm-tapir5.0 ./build.sh --all
+WITH_PYTHON_C2=OFF CLANG_PREFIX=$HOME/clang+llvm-tapir5.0 ./build.sh --all
 ```
 
 **NOTE**: This turns off the Caffe2 python build. If you want to turn on the Caffe2
@@ -154,7 +152,7 @@ python build, see next step:
 2. For installing python binaries as well of Caffe2 with TC:
 
 ```Shell
-WITH_PYTHON_C2=ON CLANG_PREFIX=/usr/local/clang+llvm-tapir5.0 ./build.sh --all
+WITH_PYTHON_C2=ON CLANG_PREFIX=$HOME/clang+llvm-tapir5.0 ./build.sh --all
 ```
 
 **NOTE**: Caffe2 doesn't provide support for pip/conda at the moment and this means
@@ -170,13 +168,13 @@ However, please check caffe2 official instructions [here](https://caffe2.ai/docs
 3. For installing TC without Caffe2:
 
 ```Shell
-WITH_CAFFE2=OFF CLANG_PREFIX=/usr/local/clang+llvm-tapir5.0 ./build.sh --all
+WITH_CAFFE2=OFF CLANG_PREFIX=$HOME/clang+llvm-tapir5.0 ./build.sh --all
 ```
 
 ### **Step 6:** Verify TC installation:
 
 ```Shell
-cd /usr/local/c2isl
+cd $HOME/c2isl
 ./test.sh                 # if you have GPU
 ./test_cpu.sh             # if you have only CPU
 ./test_python/run_test.sh   # if you have GPU

@@ -1,6 +1,8 @@
 Semantics
 =========
 
+Tensor Comprehensions follows the follow semantics.
+
 Types
 -----
 
@@ -38,7 +40,7 @@ it is a reduction index for the statement.
 If a statement has one or more reduction variables then it must specify a :code:`reduction`
 operator such as :code:`+` or :code:`max`.
 There is only one reduction operator for the entire statement because
-combinations like max/+ on different dimensions have different mathematical meanings depending on loop order.
+combinations like :code:`max/+` on different dimensions have different mathematical meanings depending on loop order.
 All reduction operators are considered to be associative and commutative to
 allow for arbitrary order of evaluation.
 
@@ -53,7 +55,9 @@ These values can be computed without performing any tensor-wide loops.
 Statements
 ----------
 
-A statement specifies a new operation to define, an optional reduction, and a right hand side::
+A statement specifies a new operation to define, an optional reduction, and a right hand side:
+
+.. code::
 
     v(index_variables) reduction=! rhs_expression
 
@@ -79,41 +83,42 @@ Grammar
 
 The EBNF for the TC comprehension language is::
 
-    number ::= <C's number literal formal>
-    ident ::= [_a-zA-Z][_a-zA-Z0-9]*
-    exp ::= number
-          | exp '+' exp
-          | exp '-' exp
-          | exp '* ' exp
-          | exp '/' exp
-          | '-' exp
-          | a '?' 'b' : 'c'
-          | ...  # other standard numeric built-ins
-          | ident '.' number # size of the number'th dimension of ident
-          | ident'('exp_list')' # built-in functions, and tensor access
+    num ::= <number literal with C syntax>
+    id ::= [_a-zA-Z0-9]*[_a-zA-Z][_a-zA-Z0-9]*
+    exp ::= num
+          | ( '-' | '!' | ... ) exp
+          | exp ( [+-*/%] | '==' | '!=' | '<=' | ... ) exp
+          | exp '?' exp ':' exp
+          | id '.' num # range of num-th dimension of id
+          | id '(' exp_list ')' # builtin call or tensor access
 
-    reduction ::= '+' | '* ' | 'min' | 'max' | <other associative reductions>
-    range_constraint ::= ident '=' '[' exp ',' exp '['
-    stmt ::= ident(ident_list) (reduction)? '=' exp [ 'where' range_constraint_list ]
-           | indent_list = ident(ident_list) # call another TC function
+    reduction ::= <associative reduction operator>
+                | '+='  | '*='  | 'min='  | 'max='
+                | '+=!' | '*=!' | 'min=!' | 'max=!'
 
-    param ::= type ident
-            | ident
-    return ::= param
-             | ident # return type inferred from file
+    range_constraint ::= id 'in' exp ':' exp
 
-    scalar_type = 'float' | 'double' | 'long' | 'byte' | ...
+    stmt ::= id '(' id_list ')' [ '=' | reduction ] exp
+               [ 'where' range_constraint_list ]
+           | id_list = id '('id_list ')' # TC function call
 
-    # eventually maybe parametric polymorphism
-    type ::= scalar_type ['(' ident_list ')']
+    arg ::= type id
+    return ::= id # inferred return type and range
 
-    func ::= 'def' ident '(' param_list ')' '->' '(' return_list ')' '{'
-                stmt_list
-             '}'
+    scalar_type ::= 'double' | 'float' | 'half'
+                  | 'int' | 'byte' | 'uint32' | ...
 
+    type ::= scalar_type [ '(' id_list ')' ]
+
+    func ::= # TC function definition
+      'def' id '(' arg_list ')' '->' '(' return_list ')' '{'
+        stmt_list
+      '}'
+
+    id_list ::= <comma separated id list>
     exp_list ::= <comma separated exp list>
-    ident_list ::= <comma separated ident list>
-    param_list ::= <comma separated param list>
+    arg_list ::= <comma separated arg list>
     stmt_list ::= <whitespace separated stmt list>
-    return_list ::= <comma separated reutnr list>
-    range_constraint ::= <non-empty comma separated list>
+    return_list ::= <comma separated return list>
+    range_constraint_list ::= <non-empty comma separated
+                               range_constraint list>

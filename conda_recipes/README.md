@@ -1,5 +1,35 @@
 # How to build conda package for Tensor Comprehensions and its dependencies
 
+## Building Conda Packages inside TC nvidia-docker image
+
+We have a runtime nvidia docker image for TC to build conda packages and run all
+tests including gpu ones. To build the packages, follow the below commands:
+
+```Shell
+# Build a new nvidia docker image
+cd c2isl/conda_recipes
+docker build -t trusty-gcc4.8-py3-conda-cuda:2 .
+```
+
+Now, we have the docker image built, we will run it by following command:
+
+```Shell
+nvidia-docker run --rm -i -t trusty-gcc4.8-py3-conda-cuda:2
+```
+
+Once you are inside the docker image, run `nvidia-smi` and verify that you have
+gpus access. Now, you are good to go and build conda packages. For that run the
+following command:
+
+```Shell
+cd c2isl/conda_recipes
+./conda_build_tc.sh
+```
+
+Sit back, relax and let the packages build. If you see any errors in packages, fix them.
+
+## Building conda packages outside docker image
+
 Steps:
 1. You need to have conda installed. Follow the instructions in [dockerfile](https://github.com/nicolasvasilache/c2isl/tree/master/docker/linux-trusty-gcc4.8-tapir5.0-cuda8-cudnn6-py3-conda) for how to install conda
 
