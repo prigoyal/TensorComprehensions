@@ -1,8 +1,7 @@
-How does Tensor Comprehensions relate to Halide?
-================================================
+Relation to Halide
+==================
 
-If you look at our source code, you'll see that Tensor Comprehensions
-uses tools from `Halide <http://halide-lang.org>`_ whenever possible. We
+Tensor Comprehensions uses tools from `Halide <http://halide-lang.org>`_ whenever possible. We
 do this both to avoid reinventing the wheel, and also so that we can
 exploit more of Halide's features in the future.
 
@@ -35,9 +34,9 @@ differences are:
    where this distinction no longer exists, but for now it creates a
    significant difference in the userbase of the two languages.
 
-What code does Tensor Comprehensions use from Halide?
------------------------------------------------------
-   
+Use of Halide in TC
+-------------------
+
 In our compiler implementation, we use Halide's intermediate
 representation (IR), some analysis tools that operate on it, portions
 of Halide's lowering pipeline, and some of Halide's X86 backend. A
@@ -46,31 +45,30 @@ terminology, is as follows:
 
 1. Tensor Comprehensions source code is parsed, semantically checked,
    then translated into an equivalent Halide pipeline using Halide's
-   front-end IR (Funcs, Vars, and RDoms).
+   front-end IR (:code:`Funcs`, :code:`Vars`, and :code:`RDoms`).
 
-2. Bounds on Funcs and RDoms are inferred in the forwards direction
+2. Bounds on :code:`Funcs` and :code:`RDoms` are inferred in the forwards direction
    during this translation according to our semantics, and explicitly
-   set on the Funcs using the Func::bound scheduling
+   set on the :code:`Funcs` using the :code:`Func::bound` scheduling
    directive. Halide's equation solving tools are employed to
-   implement our range inference semantics. Every Func is scheduled
+   implement our range inference semantics. Every :code:`Func` is scheduled
    compute_root.
 
 3. Using a heavily abbreviated version of Halide's lowering pipeline,
-   this is converted to Halide's imperative IR (a Stmt). The lowering
+   this is converted to Halide's imperative IR (a :code:`Stmt`). The lowering
    stages from Halide used are:
 
-   * schedule_functions, which creates the initial loop nest
-   * remove_undef, which handles in-place mutation of outputs
-   * uniquify_variable_names
-   * simplify
-     
-   Notably absent are any sort of bounds inference (bounds were
-   already determined during step 2), or any sort of storage
+   * :code:`schedule_functions:code:`, which creates the initial loop nest
+   * :code:`remove_undef`, which handles in-place mutation of outputs
+   * :code:`uniquify_variable_names`
+   * :code:`simplify`
+
+   Notably absent are any sort of bounds inference (bounds were already determined during step 2), or any sort of storage
    flattening, vectorization, unrolling, or cross-device copies. This
    abbreviated lowering stops at a much higher level of abstraction
    than Halide proper.
 
-4. This Stmt is then converted to a polyhedral representation. The
+4. This :code:`Stmt` is then converted to a polyhedral representation. The
    individual Provide nodes are preserved, but the containing loop
    structure is discarded. In the polyhedral representation, the
    Provide nodes are represented as abstract statement instances with
@@ -79,10 +77,10 @@ terminology, is as follows:
 5. The loop structure is optimized using polyhedral techniques.
 
 6. If compiling to CUDA: The polyhedral loop structure is compiled to
-   CUDA source code, with the Halide expressions (Exprs) in each
+   CUDA source code, with the Halide expressions (:code:`Exprs`) in each
    individual Provide node emitted as strings using a class derived
-   from Halide's IRPrinter.
+   from Halide's :code:`IRPrinter`.
 
 7. If compiling to X86: The polyhedral loop structure is compiled to
    llvm bitcode, with the Halide expressions emitted using a class
-   derived from Halide's CodeGen_X86.
+   derived from Halide's :code:`CodeGen_X86`.

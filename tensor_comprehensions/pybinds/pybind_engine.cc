@@ -26,7 +26,7 @@
 #include "pybind_utils.h"
 #include "tc/aten/aten_compiler.h"
 #include "tc/core/compilation_cache.h"
-#include "tc/core/gflags.h"
+#include "tc/core/flags.h"
 #include "tc/core/mapping_options.h"
 #include "tc/core/scope_guard.h"
 

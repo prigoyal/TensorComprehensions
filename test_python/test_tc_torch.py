@@ -88,12 +88,11 @@ class TestManualCudaInjection(unittest.TestCase):
 # TC tests without autotuning
 ###########################################################################
 class TestTC(unittest.TestCase):
-    @unittest.skip("Indirection ops not supported yet #1063")
     def test_indexing(self):
         LANG = """
-        def indexing(float(H, W) input, int32(L) index) -> (output) {
+        def indexing(float(H, W) input, int32(L) index) -> (output) {{
             output(l, w) = input(index(l), w) where l in 0:{L}
-        }
+        }}
         """
         indexing = tc.define(LANG, name="indexing", constants={"L":2})
         inp = torch.arange(0, 16).view(4, 4).cuda()

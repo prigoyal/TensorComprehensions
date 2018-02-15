@@ -9,12 +9,12 @@ pip install Sphinx
 2. We use mobile friendly sphinx_rtd_theme style theme available here https://github.com/rtfd/sphinx_rtd_theme. Run the command below:
 
 ```Shell
-pip install -r `requirements.txt`
+cd docs && pip install -r requirements.txt
 ```
 
 3. Edit the document under `docs/source/`. If you are adding a new doc, make sure to modify toctree in `source/index.rst`. For syntax about `.rst`, this link might be helpful http://www.sphinx-doc.org/en/stable/rest.html. If you have written markdown before, it should be easy to write `.rst` files as well.
 
-**TIP**: All the sphinx based documentations like Pytorch documentation [here](http://pytorch.org/docs/0.3.0/) have a linke `View Page Source` on top right. You can click that link to see the corresponding `.rst` file for that page.
+**TIP**: All the sphinx based documentations have a link `View Page Source` on top right. You can click that link to see the corresponding `.rst` file for that page.
 
 4. Run
 ```Shell
