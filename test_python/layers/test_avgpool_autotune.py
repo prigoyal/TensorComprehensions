@@ -17,7 +17,7 @@ import tensor_comprehensions as tc
 
 import torch
 import torch.cuda
-import os, unittest, time, pdb
+import os, unittest
 
 PATH_PREFIX = os.path.join("/tmp/", "tc_test")
 

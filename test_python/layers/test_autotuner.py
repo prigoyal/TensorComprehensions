@@ -18,7 +18,7 @@ from tensor_comprehensions.mapping_options import Options
 
 import torch
 import torch.cuda
-import os, unittest, time, pdb
+import os, unittest
 
 MATMUL_LANG = """
 def matmul(float(M,N) A, float(N,K) B) -> (output) {
