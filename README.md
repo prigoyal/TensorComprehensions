@@ -2,12 +2,29 @@
 
 # Using Tensor Comprehensions with PyTorch
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Examples and Documentation](#examples-and-documentation)
+- [Going through basics: by example](#going-through-basics-by-example)
+- [Layers that can't be expressed right now](#layers-that-cant-be-expressed-right-now)
+- [Note about performance / tuning](#note-about-performance-tuning)
+- [Communication](#communication)
+
+A blogpost on Tensor Comprehensions can be read [here](https://research.fb.com/announcing-tensor-comprehensions/).
+
 We provide integration of Tensor Comprehensions (TC) with PyTorch for both training
-and inference purpose. Using TC, you can express an operator using [Einstein
+and inference purposes. Using TC, you can express an operator using [Einstein
 notation](https://obilaniu6266h16.wordpress.com/2016/02/04/einstein-summation-in-numpy/)
-and get the fast CUDA code for that layer with just 3-4 lines of code. By providing
+and get the fast CUDA code for that layer with a few lines of code. By providing
 TC integration with PyTorch, we hope to make it further easy to write new
 operations with TC.
+
+Here is what the PyTorch-TC package provides:
+
+- inputs and outputs to functions are are `torch.*Tensor`s
+- Integration with PyTorch `autograd`: if you specify forward and backward functions, you get an autograd function that takes `Variable` as input and returns `Variable` as output. Here's an [example](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_convolution_train-py)
+- autotuner results can be cached to a file (for reuse)
 
 To make it easy to use TC, we provide conda packages for it. Follow the instructions
 below on how to install the conda package.
@@ -55,12 +72,13 @@ cd $HOME && git clone git@github.com:prigoyal/TensorComprehensions.git --recursi
 ./TensorComprehensions/test_python/run_test.sh
 ```
 
-### **Step 3**: Explore TC
+## Examples and documentation
 
-In order to explore TC, there are few helpful resources to get started:
+In order to explore Tensor Comprehensions (TC), there are few helpful resources to get started:
 
 1. We provide **examples** of TC definitions covering wide range of Deep Learning layers.
-Those example TC can be found at the repo we just checked out in previous step
+
+The example TC can be found at the repo we just checked out in previous step
 `$HOME/TensorComprehensions/test_python/layers`. These examples can serve as a helpful reference
 for writing TC for a new operation.
 
@@ -80,7 +98,9 @@ are particularly helpful to get insights into writing Tensor Comprehensions.
 You can read briefly about autotuner [here](https://facebookresearch.github.io/TensorComprehensions/autotuner.html) and look at various examples of autotuning
 in `$HOME/TensorComprehensions/test_python/layers/test_autotuner`
 
-## Examples
+5. To construct a TC autograd function, [here](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_convolution_train-py) is one self-descriptive example.
+
+## Going through basics: by example
 
 Let's see few examples of what features TensorComprehensions has and what you can do as a starter. I'll pick a simple layer `matmul`
 for the purpose of examples:
@@ -121,9 +141,12 @@ def matmul(float(M,N) A, float(N,K) B) -> (output) {
 }
 """
 matmul = tc.define(lang, name="matmul")
-matmul.autotune((3, 4), (4, 5), cache=True, **tc.small_size_autotuner_options)
-matmul.autotune((100, 400), (400, 500), cache=True, **tc.autotuner_default_options)
+matmul.autotune((3, 4), (4, 5), cache="matmul_345.tc", **tc.small_size_autotuner_options)
+matmul.autotune((100, 400), (400, 500), cache="matmul_100400500.tc", **tc.autotuner_default_options)
 ```
+
+**The big advantage of specifying `cache` is that the next time you run the program, the cached autotuned values are used.**
+Beware that if you move to a significantly different type of GPU, then you might want to tune again for maximum performance.
 
 3. Train layer with TC, autotune it and run it
 
@@ -146,7 +169,7 @@ out = KRU(W2, X, options=options)
 out[0].sum().backward()
 ```
 
-4. Get your CUDA code
+4. Dump out generated CUDA code (for fun?)
 
 ```python
 import tensor_comprehensions as tc
@@ -162,10 +185,6 @@ matmul = tc.define(lang, name="matmul")
 mat1, mat2 = torch.randn(3, 4).cuda(), torch.randn(4, 5).cuda()
 out = matmul(mat1, mat2)
 ```
-
-5. much more....
-
-Now go ahead, write a new TC (maybe fusions :) )
 
 ## Layers that can't be expressed right now
 
@@ -231,7 +250,7 @@ options = {
 - `number_elites` - number of candidates preserved intact between generations. `1` is usually sufficient
 - `min_launch_total_threads` - If you have really input small sizes, set this to `1`.
 
-
+Look at [docs](https://facebookresearch.github.io/TensorComprehensions/autotuner.html) for more details
 
 ## Communication
 
