@@ -11,6 +11,7 @@ operations with TC.
 
 To make it easy to use TC, we provide conda packages for it. Follow the instructions
 below on how to install the conda package.
+Building from source is not easy, because of large dependencies like llvm, so using the conda package is ideal.
 
 ## Installation
 You will need anaconda to install conda packages of TC. If you don't have it, follow the next step, otherwise verify conda is in your **$PATH**.
@@ -38,16 +39,15 @@ which conda
 This command should print the path of your conda bin. If it doesn't, make sure conda is
 in your $PATH.
 
-### **Step 2**: Conda Install TC
+### **Step 2**: Conda Install Tensor Comprehensions
 
-Now, go ahead and install TC by running following commands.
+Now, go ahead and install Tensor Comprehensions by running following commands.
 
 ```Shell
-conda create -y --name tc-test python=3.6
-source activate tc-test
 conda install -y -c pytorch -c https://conda.anaconda.org/t/oJuz1IosRLQ5/prigoyal tensor_comprehensions
 ```
 
+TODO: CHANGE to gist file
 Now, clone the repo to see bunch of examples and run a few tests:
 
 ```Shell
@@ -64,31 +64,33 @@ Those example TC can be found at the repo we just checked out in previous step
 `$HOME/TensorComprehensions/test_python/layers`. These examples can serve as a helpful reference
 for writing TC for a new operation.
 
-2. TC is based on **Einstein notation** which is very well explained [here](https://obilaniu6266h16.wordpress.com/2016/02/04/einstein-summation-in-numpy/). This notation is
-also widely used in Numpy. If you don't know the notation, I recommend doing a 5 minute read of the above link.
+The list of examples we provide are: [avgpool](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_avgpool_autotune-py), [maxpool](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_maxpool-py), [matmul](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_matmul-py), [matmul - give output buffers](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_matmul_reuse_outputs-py) and [batch-matmul](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_batchmatmul-py), [convolution](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_convolution-py), [strided-convolution](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_convolution_strided-py), [batchnorm](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_batchnorm-py), [copy](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_copy-py), [cosine similarity](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_cosine_similarity-py), [Fully-connected](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_fc-py), [fused FC + ReLU](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_fusion_fcrelu-py), [group-convolutions](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_group_convolution-py), [strided group-convolutions](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_group_convolution_strided-py), [indexing](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_indexing-py), [Embedding (lookup table)](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_lookup_table-py), [small-mobilenet](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_small_mobilenet-py), [softmax](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_softmax-py), [tensordot](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_tensordot-py), [transpose](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_transpose-py)
+
+2. Tensor Comprehensions are based on **Einstein notation** which is very well explained [here](https://obilaniu6266h16.wordpress.com/2016/02/04/einstein-summation-in-numpy/). This notation is
+also widely used in Numpy. If you don't know the notation, we recommend doing a 5 minute read of the above link.
 
 3. [TC Documentation](https://facebookresearch.github.io/TensorComprehensions/index.html)
-is a very helpful resource to understand how TC is expressed. The sections on
+is a very helpful resource to understand how Tensor Comprehensions are expressed. The sections on
 [introduction](https://facebookresearch.github.io/TensorComprehensions/introduction.html),
 [range inference](https://facebookresearch.github.io/TensorComprehensions/inference.html),
 [semantics](https://facebookresearch.github.io/TensorComprehensions/semantics.html)
-are particularly helpful to get insights into writing TC.
+are particularly helpful to get insights into writing Tensor Comprehensions.
 
 4. **Autotuner**: TC provides an evolutionary search based algorithm to automatically tune the kernel.
-You can read briefly about autotuner [here]() and look at various examples of autotuning
+You can read briefly about autotuner [here](https://facebookresearch.github.io/TensorComprehensions/autotuner.html) and look at various examples of autotuning
 in `$HOME/TensorComprehensions/test_python/layers/test_autotuner`
 
 ## Examples
 
-Let's see few examples of what features TC has and what you can do as a starter. I'll pick a simple layer `matmul`
+Let's see few examples of what features TensorComprehensions has and what you can do as a starter. I'll pick a simple layer `matmul`
 for the purpose of examples:
 
-1. New TC
+1. New Tensor Comprehension
 
 ```python
 lang = """
 def matmul(float(M,N) A, float(N,K) B) -> (output) {
-  output(i, j) +=! A(i, kk) * B(kk, j)
+  output(i, j) +=! A(i, kk) * B(kk, j) // ! means initialize unwritten output to 0.0
 }
 """
 matmul = tc.define(lang, name="matmul")
@@ -165,17 +167,70 @@ out = matmul(mat1, mat2)
 
 Now go ahead, write a new TC (maybe fusions :) )
 
-## What Layers we can't express right now?
+## Layers that can't be expressed right now
 
-Currently, we don't support layers:
+1. Reshaping Tensors inside the language
+2. Dropout : RNGs are not suppported inside TC language, because TC doesn't do internal allocations
+3. Strided "tensors" : input Tensors have to be contiguous. If they are not contiguous, they are made contiguous before passed in to the TC backend.
+4. RNNs : TC language doesn't have loops yet. You can write them unrolled if you want :)
 
-1. Reshape
-2. Dropout
-3. Strided "tensors"
-4. Padding
+**We are actively working on these and many more features. If there is some feature that can be very helpful
+to you, please send your request our way.**
 
-We are actively working on these and many more features. If there is some feature that can be very helpful
-to you, please send your request our way.
+## Note about performance / tuning
+
+Tensor Comprehensions have an autotuner that uses evolutionary search to find faster kernels.
+Here is what you should know about the polyhederal exploration / evolutionary search:
+
+### Static sizes for autotuning
+
+- The autotuner needs static input sizes (for now). You cannot tune a kernel, for say: batchsize between `16 and 32`
+  - you can autotune `avgpool2x2` for input shape `(16, 32, 24, 23)`:
+    `avgpool.autotune((16, 32, 24, 23), **tc.small_size_autotuner_options, cache="16x32x24x23.tc")`
+  - if you want to target multiple input shapes, run multiple autotune calls:
+    ```
+    avgpool.autotune((16, 32, 24, 23), **tc.small_size_autotuner_options, cache="mysize1.tc")
+    avgpool.autotune((32, 1, 128, 128), **tc.small_size_autotuner_options, cache="mysize2.tc")
+    ```
+  - The more static we make the sizes, the better and faster the search procedure. Hence, we made this trade-off of only supporting static sizes in the initial release.
+  
+### Autotuning options primer
+
+By **default**, `tc.autotuner_default_options` is:
+
+```
+options = {
+    "threads": 32, "generations": 2, "pop_size": 10, "number_elites": 1
+}
+```
+
+Good for quick autotuning (2 generations finish quickly)
+
+**good default that runs for a bit longer (maybe in exchange for better performance)**
+
+```
+options = {
+    "threads": 32, "generations": 5, "pop_size": 10, "number_elites": 1
+}
+```
+
+**good default that runs for a LOT longer**
+
+```
+options = {
+    "threads": 32, "generations": 10, "pop_size": 20, "number_elites": 1
+}
+```
+
+
+**brief explanation**
+
+- `threads` - set this to number of CPU cores available
+- `generations` - 5 to 10 generations is a good number
+- `pop_size` - 10 is usually reasonable. You can try 10 to 20
+- `number_elites` - number of candidates preserved intact between generations. `1` is usually sufficient
+- `min_launch_total_threads` - If you have really input small sizes, set this to `1`.
+
 
 
 ## Communication
