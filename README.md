@@ -8,7 +8,7 @@
 - [Examples and Documentation](#examples-and-documentation)
 - [Going through basics: by example](#going-through-basics-by-example)
 - [Layers that can't be expressed right now](#layers-that-cant-be-expressed-right-now)
-- [Note about performance / tuning](#note-about-performance-tuning)
+- [Note about performance / tuning](#note-about-performance--tuning)
 - [Communication](#communication)
 
 A blogpost on Tensor Comprehensions can be read [here](https://research.fb.com/announcing-tensor-comprehensions/).
