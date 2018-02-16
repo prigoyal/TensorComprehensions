@@ -64,23 +64,11 @@ Now, go ahead and install Tensor Comprehensions by running following commands.
 conda install -y -c pytorch -c https://conda.anaconda.org/t/oJuz1IosRLQ5/prigoyal tensor_comprehensions
 ```
 
-TODO: CHANGE to gist file
-Now, clone the repo to see bunch of examples and run a few tests:
-
-```Shell
-cd $HOME && git clone git@github.com:prigoyal/TensorComprehensions.git --recursive
-./TensorComprehensions/test_python/run_test.sh
-```
-
 ## Examples and documentation
 
 In order to explore Tensor Comprehensions (TC), there are few helpful resources to get started:
 
 1. We provide **examples** of TC definitions covering wide range of Deep Learning layers.
-
-The example TC can be found at the repo we just checked out in previous step
-`$HOME/TensorComprehensions/test_python/layers`. These examples can serve as a helpful reference
-for writing TC for a new operation.
 
 The list of examples we provide are: [avgpool](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_avgpool_autotune-py), [maxpool](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_maxpool-py), [matmul](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_matmul-py), [matmul - give output buffers](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_matmul_reuse_outputs-py) and [batch-matmul](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_batchmatmul-py), [convolution](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_convolution-py), [strided-convolution](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_convolution_strided-py), [batchnorm](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_batchnorm-py), [copy](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_copy-py), [cosine similarity](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_cosine_similarity-py), [Fully-connected](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_fc-py), [fused FC + ReLU](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_fusion_fcrelu-py), [group-convolutions](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_group_convolution-py), [strided group-convolutions](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_group_convolution_strided-py), [indexing](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_indexing-py), [Embedding (lookup table)](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_lookup_table-py), [small-mobilenet](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_small_mobilenet-py), [softmax](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_softmax-py), [tensordot](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_tensordot-py), [transpose](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_transpose-py)
 
@@ -95,8 +83,7 @@ is a very helpful resource to understand how Tensor Comprehensions are expressed
 are particularly helpful to get insights into writing Tensor Comprehensions.
 
 4. **Autotuner**: TC provides an evolutionary search based algorithm to automatically tune the kernel.
-You can read briefly about autotuner [here](https://facebookresearch.github.io/TensorComprehensions/autotuner.html) and look at various examples of autotuning
-in `$HOME/TensorComprehensions/test_python/layers/test_autotuner`
+You can read briefly about autotuner [here](https://facebookresearch.github.io/TensorComprehensions/autotuner.html) and look at various [examples of autotuning](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_autotuner-py).
 
 5. To construct a TC autograd function, [here](https://gist.github.com/anonymous/dc0cd7de343922a8c0c0636ccc4889a9#file-test_convolution_train-py) is one self-descriptive example.
 
