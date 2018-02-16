@@ -20,26 +20,26 @@ $PYTHON test_tc.py -v
 echo "Running debug init test"
 $PYTHON test_debug_init.py -v
 
-###############################################################################
-# ArXiv tests
-###############################################################################
-echo "Running Batchmatmul test"
-$PYTHON pldi/test_batchmatmul.py -v
-
-echo "Running Batchnorm test"
-$PYTHON pldi/test_batchnorm.py -v
-
-echo "Running C3 test"
-$PYTHON pldi/test_C3.py -v
-
-echo "Running Group Convolution test"
-$PYTHON pldi/test_group_convolution.py -v
-
-echo "Running MLP test"
-$PYTHON pldi/test_mlp.py -v
-
-echo "Running TMM test"
-$PYTHON pldi/test_tmm.py -v
+# ###############################################################################
+# # ArXiv tests - redundant with the layers
+# ###############################################################################
+# echo "Running Batchmatmul test"
+# $PYTHON pldi/test_batchmatmul.py -v
+#
+# echo "Running Batchnorm test"
+# $PYTHON pldi/test_batchnorm.py -v
+#
+# echo "Running C3 test"
+# $PYTHON pldi/test_C3.py -v
+#
+# echo "Running Group Convolution test"
+# $PYTHON pldi/test_group_convolution.py -v
+#
+# echo "Running MLP test"
+# $PYTHON pldi/test_mlp.py -v
+#
+# echo "Running TMM test"
+# $PYTHON pldi/test_tmm.py -v
 
 ###############################################################################
 # PyTorch testing all features
