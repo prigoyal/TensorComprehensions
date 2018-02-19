@@ -1,5 +1,5 @@
 package:
-  name: llvm
+  name: llvm-tapir50
   version: "{{ environ.get('CLANG_LLVM_BUILD_VERSION') }}"
 
 source:
@@ -15,12 +15,8 @@ requirements:
 build:
   number: {{ environ.get('CLANG_LLVM_BUILD_NUMBER') }}
   skip: True   # [win]
-  features:
-    - tapir50
 
 test:
-  requires:
-    - tapir50
   commands:
     - $PREFIX/bin/llvm-config --libs
     - $PREFIX/bin/llc -version

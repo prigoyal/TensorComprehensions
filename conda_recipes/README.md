@@ -57,7 +57,7 @@ We will add `soumith` channel since we will get pytorch from there. Channels are
 
 ```Shell
 conda config --add channels conda-forge
-conda config --add channels soumith
+conda config --add channels pytorch
 ```
 
 For example: this is required for the libgmp dependency of ISL and we can get

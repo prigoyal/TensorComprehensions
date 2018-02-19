@@ -24,8 +24,9 @@ class TestSoftmax(unittest.TestCase):
 
     def test_softmax(self):
         LANG = """
-        def softmax(float(N, D) I) -> (O, expsum) {
-            expsum(n) +=! exp(I(n, d))
+        def softmax(float(N, D) I) -> (O, expsum, maxVal) {
+            maxVal(n) max= I(n, d)
+            expsum(n) +=! exp(I(n, d) - maxVal(n))
             O(n, d) = exp(I(n, d)) / expsum(n)
         }
         """

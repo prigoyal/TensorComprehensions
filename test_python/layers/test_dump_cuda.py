@@ -21,7 +21,7 @@ import unittest
 
 # enable this to dump cuda code generated whenever tc layer runs: simple run or
 # autotuner run
-tc.GlobalDebugInit(["tc", "--dump_cuda=true"])
+tc.GlobalDebugInit(["--dump_cuda=true"])
 
 
 class TestDumpCuda(unittest.TestCase):

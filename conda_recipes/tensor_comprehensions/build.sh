@@ -107,6 +107,6 @@ echo "Finished installing with setuptools"
 echo "Running all tests now"
 ./test_cpu.sh || exit 1
 ./test.sh || exit 1
-${PYTHON} ${TC_DIR}/test_python/test_debug_init.py -v || exit 1
+./test_python/run_test.sh || exit 1
 
 echo "Successfully built TC package"

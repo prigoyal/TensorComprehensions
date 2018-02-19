@@ -150,29 +150,6 @@ find_library(HALIDE_LIBRARIES NAMES Halide PATHS ${CMAKE_INSTALL_PREFIX} PATH_SU
 message(STATUS "Found Halide.so file: ${HALIDE_LIBRARIES}")
 
 ################################################################################
-
-# Caffe2
-if (WITH_CAFFE2)
-  # We suppress sign-compare error messages because caffe2 headers have these
-  # errors.
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare")
-
-  # eigen - needed inside Caffe2 only
-  # Caffe2 probably used its bundled Eigen (which it didn't install) in this case.
-  message(WARNING "Couldn't find Eigen headers, assuming caffe2 used in-tree headers")
-  include_directories(third-party/caffe2/third_party/eigen)
-
-  find_path(CAFFE2_INCLUDE_DIR NAMES caffe2)
-  include_directories(${CAFFE2_INCLUDE_DIR})
-  find_library(CAFFE2_CPU_LIBRARIES NAMES caffe2 PATHS ${CMAKE_INSTALL_PREFIX} PATH_SUFFIXES lib lib64)
-  message(STATUS "Found Caffe2_CPU: ${CAFFE2_CPU_LIBRARIES}")
-  find_library(CAFFE2_GPU_LIBRARIES NAMES caffe2_gpu PATHS ${CMAKE_INSTALL_PREFIX} PATH_SUFFIXES lib lib64)
-  message(STATUS "Found Caffe2_GPU: ${CAFFE2_GPU_LIBRARIES}")
-else()
-  message(STATUS "Caffe2 installation is turned off")
-endif()
-
-################################################################################
 # ATen
 # first find python path
 execute_process(COMMAND which python OUTPUT_VARIABLE __python OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -203,6 +180,29 @@ else()
   include_directories(${ATEN_INCLUDE_DIR})
   find_library(ATEN_LIBRARIES NAMES ATen PATHS ${CMAKE_INSTALL_PREFIX} PATH_SUFFIXES lib lib64)
   message(STATUS "Found ATen.so file: ${ATEN_LIBRARIES}")
+endif()
+
+################################################################################
+
+# Caffe2
+if (WITH_CAFFE2)
+  # We suppress sign-compare error messages because caffe2 headers have these
+  # errors.
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare")
+
+  # eigen - needed inside Caffe2 only
+  # Caffe2 probably used its bundled Eigen (which it didn't install) in this case.
+  message(WARNING "Couldn't find Eigen headers, assuming caffe2 used in-tree headers")
+  include_directories(third-party/caffe2/third_party/eigen)
+
+  find_path(CAFFE2_INCLUDE_DIR NAMES caffe2)
+  include_directories(${CAFFE2_INCLUDE_DIR})
+  find_library(CAFFE2_CPU_LIBRARIES NAMES caffe2 PATHS ${CMAKE_INSTALL_PREFIX} PATH_SUFFIXES lib lib64)
+  message(STATUS "Found Caffe2_CPU: ${CAFFE2_CPU_LIBRARIES}")
+  find_library(CAFFE2_GPU_LIBRARIES NAMES caffe2_gpu PATHS ${CMAKE_INSTALL_PREFIX} PATH_SUFFIXES lib lib64)
+  message(STATUS "Found Caffe2_GPU: ${CAFFE2_GPU_LIBRARIES}")
+else()
+  message(STATUS "Caffe2 installation is turned off")
 endif()
 
 ################################################################################

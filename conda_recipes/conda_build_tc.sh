@@ -28,9 +28,9 @@ echo "ISL-TC packaged Successfully"
 
 ###############################################################################
 # CLANG+LLVM settings
-CLANG_LLVM_BUILD_VERSION="0.2.1"
+CLANG_LLVM_BUILD_VERSION="0.2.2"
 CLANG_LLVM_BUILD_NUMBER=1
-CLANG_LLVM_GIT_HASH="65dd2568aa09fcf5498c0fe9adfd92608dbf4d5c"
+CLANG_LLVM_GIT_HASH="1f09ac94609f7bd432bd139897056ef96f339812"
 
 echo "Building clang+llvm-tapir5.0"
 echo "CLANG_LLVM_BUILD_VERSION: $CLANG_LLVM_BUILD_VERSION CLANG_LLVM_BUILD_NUMBER: ${CLANG_LLVM_BUILD_NUMBER}"
@@ -78,7 +78,7 @@ echo "GLOG packaged Successfully"
 ##############################################################################
 # Protobuf settings
 PROTO_BUILD_VERSION="3.4.1"
-PROTO_BUILD_NUMBER=1
+PROTO_BUILD_NUMBER=2
 
 echo "Packaging Protobuf ==> PROTO_BUILD_VERSION: ${PROTO_BUILD_VERSION} PROTO_BUILD_NUMBER: ${PROTO_BUILD_NUMBER}"
 
@@ -91,9 +91,9 @@ echo "Protobuf packaged Successfully"
 
 ##############################################################################
 # Halide settings
-HALIDE_BUILD_VERSION="0.2.1"
-HALIDE_BUILD_NUMBER=1
-HALIDE_GIT_HASH="5e432c6c5e4bfc85a158bff12ce093812074ade9"
+HALIDE_BUILD_VERSION="0.2.2"
+HALIDE_BUILD_NUMBER=2
+HALIDE_GIT_HASH="fe85f6a70e9d2f16d5a1591b90c8e598dbcf4c7f"
 
 echo "Packaging HALIDE ==> HALIDE_BUILD_VERSION: ${HALIDE_BUILD_VERSION} HALIDE_BUILD_NUMBER: ${HALIDE_BUILD_NUMBER}"
 
@@ -107,10 +107,10 @@ echo "HALIDE packaged Successfully"
 
 ###############################################################################
 # Tensor Comprehensions settings
-TC_BUILD_VERSION="0.2.1"
-TC_BUILD_NUMBER=2
-# TAG: tc-v0.2.1
-TC_GIT_HASH="e012dc9138a7e31229c9af40c5538eb298fa73be"
+TC_BUILD_VERSION="0.2.2"
+TC_BUILD_NUMBER=3
+# TAG: tc-v0.2.2
+TC_GIT_HASH="feb7fa3e49b4d1a21630b8e3532466512046a674"
 
 echo "Packaging TC ==> TC_BUILD_VERSION: ${TC_BUILD_VERSION} TC_BUILD_NUMBER: ${TC_BUILD_NUMBER}"
 

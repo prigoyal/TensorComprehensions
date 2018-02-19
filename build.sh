@@ -245,9 +245,9 @@ function install_caffe2() {
     rm -rf * || exit 1
 
     if ! test ${USE_CONTBUILD_CACHE}; then
-      ${CMAKE_VERSION} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPYTHON_EXECUTABLE=${PYTHON} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_PYTHON=${WITH_PYTHON_C2} -DUSE_GLOG=OFF -DUSE_GFLAGS=OFF -DUSE_NNPACK=${WITH_NNPACK} -DUSE_GLOO=OFF -DUSE_NCCL=OFF -DUSE_LMDB=OFF -DUSE_LEVELDB=OFF -DBUILD_TEST=OFF -DUSE_OPENCV=OFF -DUSE_OPENMP=OFF -DCMAKE_INSTALL_MESSAGE=NEVER -DCMAKE_CXX_FLAGS="-fno-var-tracking-assignments" -DPROTOBUF_PROTOC_EXECUTABLE=${PROTOC} -DCUDNN_ROOT_DIR=${CUDNN_ROOT_DIR} -DCUB_INCLUDE_DIR=${CUB_INCLUDE_DIR} -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} .. || exit
+      ${CMAKE_VERSION} -DBUILD_BINARY=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_PYTHON=${WITH_PYTHON_C2} -DUSE_GLOG=OFF -DUSE_GFLAGS=OFF -DUSE_NNPACK=${WITH_NNPACK} -DGLOG_ROOT_DIR=${INSTALL_PREFIX} -DUSE_GLOO=OFF -DUSE_NCCL=OFF -DUSE_LMDB=OFF -DUSE_LEVELDB=OFF -DBUILD_TEST=OFF -DUSE_OPENCV=OFF -DUSE_OPENMP=OFF -DCMAKE_INSTALL_MESSAGE=NEVER -DCMAKE_CXX_FLAGS="-fno-var-tracking-assignments" -DPROTOBUF_PROTOC_EXECUTABLE=${PROTOC} -DCUDNN_ROOT_DIR=${CUDNN_ROOT_DIR} -DCUB_INCLUDE_DIR=${CUB_INCLUDE_DIR} -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} .. || exit
     else
-      ${CMAKE_VERSION} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPYTHON_EXECUTABLE=${PYTHON} -DCUDA_ARCH_NAME="Maxwell" -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_PYTHON=${WITH_PYTHON_C2} -DUSE_GLOG=OFF -DUSE_GLOO=OFF -DUSE_NNPACK=${WITH_NNPACK} -DUSE_NCCL=OFF -DUSE_GFLAGS=OFF -DUSE_LMDB=OFF -DUSE_LEVELDB=OFF -DBUILD_TEST=OFF -DUSE_OPENCV=OFF -DUSE_OPENMP=OFF -DCMAKE_INSTALL_MESSAGE=NEVER -DCMAKE_CXX_FLAGS="-fno-var-tracking-assignments" -DPROTOBUF_PROTOC_EXECUTABLE=${PROTOC} -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} .. || exit
+      ${CMAKE_VERSION} -DBUILD_BINARY=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCUDA_ARCH_NAME="Maxwell" -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_PYTHON=${WITH_PYTHON_C2} -DUSE_GLOG=OFF -DUSE_GFLAGS=OFF -DGLOG_ROOT_DIR=${INSTALL_PREFIX} -DUSE_GLOO=OFF -DUSE_NNPACK=${WITH_NNPACK} -DUSE_NCCL=OFF -DUSE_LMDB=OFF -DUSE_LEVELDB=OFF -DBUILD_TEST=OFF -DUSE_OPENCV=OFF -DUSE_OPENMP=OFF -DCMAKE_INSTALL_MESSAGE=NEVER -DCMAKE_CXX_FLAGS="-fno-var-tracking-assignments" -DPROTOBUF_PROTOC_EXECUTABLE=${PROTOC} -DCUB_INCLUDE_DIR=${CUB_INCLUDE_DIR} -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} .. || exit
     fi
   fi
   VERBOSE=${VERBOSE} make -j $CORES install -s || exit 1
@@ -404,8 +404,8 @@ function install_halide() {
       WITH_OPENGL= \
       WITH_METAL= \
       make -f ../Makefile -j $CORES install || exit 1
-      mkdir -p ${TC_DIR}/third-party-install/include/Halide
-      mv ${TC_DIR}/third-party-install/include/Halide*.h  ${TC_DIR}/third-party-install/include/Halide/
+      mkdir -p ${INSTALL_PREFIX}/include/Halide
+      mv ${INSTALL_PREFIX}/include/Halide*.h  ${INSTALL_PREFIX}/include/Halide/
       set_bcache ${TC_DIR}/third-party/halide ${HALIDE_BUILD_CACHE}
     fi
 
@@ -415,11 +415,21 @@ function install_halide() {
 }
 
 if ! test -z $gflags || ! test -z $all; then
-    install_gflags
+  if [[ $(find $CONDA_PREFIX -name libgflags.so) ]]; then
+      echo "gflags found"
+  else
+      echo "no files found"
+      install_gflags
+  fi
 fi
 
 if ! test -z $glog || ! test -z $all; then
-    install_glog
+    if [[ $(find $CONDA_PREFIX -name libglog.so) ]]; then
+        echo "glog found"
+    else
+        echo "no files found"
+        install_glog
+    fi
 fi
 
 if ! test -z $aten || ! test -z $all; then
@@ -431,13 +441,23 @@ if ! test -z $aten || ! test -z $all; then
 fi
 
 if ! test -z $caffe2 || ! test -z $all ; then
-  if [ "$WITH_CAFFE2" == "ON" ]; then
-    install_caffe2
-  fi
+    if [ "$WITH_CAFFE2" == "ON" ]; then
+        if [[ $(find $CONDA_PREFIX -name libcaffe2_gpu.so) ]]; then
+            echo "caffe2 found"
+        else
+            echo "no files found"
+            install_caffe2
+        fi
+    fi
 fi
 
 if ! test -z $isl || ! test -z $all; then
-    install_isl
+    if [[ $(find $CONDA_PREFIX -name libisl.so) ]]; then
+        echo "isl found"
+    else
+        echo "no files found"
+        install_isl
+    fi
 fi
 
 if ! test -z $dlpack || ! test -z $all; then
@@ -445,7 +465,12 @@ if ! test -z $dlpack || ! test -z $all; then
 fi
 
 if ! test -z $halide || ! test -z $all; then
-    install_halide
+    if [[ $(find $CONDA_PREFIX -name libHalide.so) ]]; then
+        echo "Halide found"
+    else
+        echo "no files found"
+        install_halide
+    fi
 fi
 
 if ! test -z $tc || ! test -z $all; then
