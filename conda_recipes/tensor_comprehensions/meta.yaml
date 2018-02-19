@@ -9,8 +9,8 @@ source:
 requirements:
   build:
     - isl-tc==0.2.1
-    - llvm==0.2.1
-    - halide==0.2.1
+    - llvm-tapir50==0.2.2
+    - halide==0.2.2
     - gflags==2.4.4
     - glog==0.3.9
     - protobuf==3.4.1
@@ -24,8 +24,8 @@ requirements:
 
   run:
     - isl-tc==0.2.1
-    - llvm==0.2.1
-    - halide==0.2.1
+    - llvm-tapir50==0.2.2
+    - halide==0.2.2
     - gflags==2.4.4
     - glog==0.3.9
     - protobuf==3.4.1
@@ -36,12 +36,8 @@ requirements:
 build:
   number: {{ environ.get('TC_BUILD_NUMBER') }}
   skip: True   # [win]
-  features:
-    - tapir50
 
 test:
-  requires:
-    - tapir50
   imports:
     - torch
     - torch.cuda
@@ -71,14 +67,12 @@ test:
     - test -d $PREFIX/include/gtest
     - test -d $PREFIX/include/cub
 
-    - python test_python/test_tc.py -v
-    - python test_python/test_tc_torch.py -v
-    - python test_python/test_debug_init.py -v
+    - ./test_python/run_test.sh
 
 about:
-  home: https://github.com/nicolasvasilache/c2isl
+  home: https://github.com/facebookresearch/TensorComprehensions
   license: Apache 2.0
-  summary: Framework-Agnostic Abstractions for High-Performance Machine Learning
+  summary: A domain specific language to express machine learning workloads
 
 extra:
   recipe-maintainers:

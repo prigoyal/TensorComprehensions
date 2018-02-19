@@ -39,6 +39,9 @@ PYBIND11_MODULE(tc, m) {
   m.def(
       "global_debug_init", // exposing the debugging flags to people
       [](std::vector<std::string> args) {
+        if (args.size() > 0) {
+          args.insert(args.begin(), "tc");
+        }
         int numArgs = args.size();
         // now we construct a char** argv type from args
         std::vector<char*> vargs; // char* vector args

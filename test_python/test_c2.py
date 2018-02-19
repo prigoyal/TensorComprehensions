@@ -13,25 +13,31 @@
 # limitations under the License.
 ##############################################################################
 
-import os, unittest
+import unittest, os
+import numpy as np
 
-import torch
-import torch.cuda
-import tensor_comprehensions as tc
+from caffe2.proto import caffe2_pb2
+from caffe2.python import core, workspace, dyndep
 
-tc.GlobalDebugInit(["--dump_cuda=true", "--debug_tc_mapper=false"])
+tc_c2_lib = os.path.join(os.environ.get("CONDA_PREFIX"), "lib/libtc_c2.so")
+dyndep.InitOpsLibrary(tc_c2_lib)
 
 
-class TestDebugInit(unittest.TestCase):
-    def test_debug_init(self):
+class TestCaffe2(unittest.TestCase):
+
+    def test_matmul_caffe2(self):
         lang = """
         def matmul(float(M,N) A, float(N,K) B) -> (output) {
           output(i, j) +=! A(i, kk) * B(kk, j)
         }
         """
-        matmul = tc.define(lang, name="matmul")
-        mat1, mat2 = torch.randn(3, 4).cuda(), torch.randn(4, 5).cuda()
-        out = matmul(mat1, mat2)
+        mat1, mat2 = np.random.rand(100, 400), np.random.rand(400, 500)
+        with core.DeviceScope(core.DeviceOption(caffe2_pb2.CUDA, 0)):
+            workspace.FeedBlob('mat1', mat1.astype(np.float32))
+            workspace.FeedBlob('mat2', mat2.astype(np.float32))
+            matmul = core.CreateOperator("TcOp", ["mat1", "mat2"], ["out"], lang=lang, tcName="matmul")
+        workspace.RunOperatorOnce(matmul)
+        out = workspace.FetchBlob("out")
 
 
 if __name__ == '__main__':

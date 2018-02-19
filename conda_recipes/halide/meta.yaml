@@ -8,23 +8,17 @@ source:
 
 requirements:
   build:
-    - llvm==0.2.1
-    - tapir50
+    - llvm-tapir50==0.2.2
     - cmake
   run:
-    - llvm==0.2.1
-    - tapir50
+    - llvm-tapir50==0.2.2
     - cmake
 
 build:
   number: {{ environ.get('HALIDE_BUILD_NUMBER') }}
   skip: True   # [win]
-  features:
-    - tapir50
 
 test:
-  requires:
-    - tapir50
   commands:
     - test -f $PREFIX/lib/libHalide.so
     - test -f $PREFIX/lib/libHalide.a

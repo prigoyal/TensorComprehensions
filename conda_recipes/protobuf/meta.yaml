@@ -11,18 +11,29 @@ requirements:
     - libtool
     - unzip
     - zlib
+    - setuptools
+    - pkg-config
+    - six
   run:
     - zlib
     - unzip
+    - setuptools
+    - six
 
 build:
   number: {{ environ.get('PROTO_BUILD_NUMBER') }}
   skip: true  # [win]
 
 test:
+  imports:
+    - google
+    - google.protobuf
+    - google.protobuf.internal
+    - google.protobuf.pyext
+    - google.protobuf.util
+    - google.protobuf.compiler
   commands:
     - which protoc
-    - protoc --help
     - protoc --version
     - test -f ${PREFIX}/lib/libprotobuf.a
     - test -f ${PREFIX}/lib/libprotobuf.so

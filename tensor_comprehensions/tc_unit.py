@@ -54,7 +54,9 @@ def get_options_from_cache_file(name, *inputs, **kwargs):
                 cache_file = cache_file + "_backward"
         if "tuner" in kwargs:
             tuner = kwargs["tuner"]
-            options = tuner.load(cache_file, name, list(inputs), 1)[0]
+            loaded_options = tuner.load(cache_file, name, list(inputs), 1)
+            if len(loaded_options) > 0:
+                options = loaded_options[0]
         else:
             tuner = TcAutotuner(kwargs["tc_lang"])
             options = tuner.load(cache_file, name, list(inputs))
@@ -70,16 +72,21 @@ def get_options_from_kwargs(name, *inputs, **kwargs):
     if "options" in kwargs and kwargs["options"] is not None:
         options = kwargs["options"]
         assert "type" in kwargs, "layer type not specified: forward/backward"
-        if "training" in kwargs and kwargs["training"]:
-            assert len(options) == 2, \
-                "For a training layer, pass the options for forward/backward both."
-            options = options[0] if (kwargs["type"] == "forward") else options[1]
-    else:
+        if isinstance(options, list) and len(options) == 2:
+            options = options[0] if kwargs["type"] == "forward" else options[1]
+        elif "training" in kwargs and kwargs["training"] and kwargs["type"] == "backward":
+            logger.warning('Same options will be used to run backward layer, please pass backward options for better performance.')
+    elif "cache" in kwargs and kwargs["cache"]:
         options = get_options_from_cache_file(name, *inputs, **kwargs)
+    elif "options_cache" in kwargs and kwargs["options_cache"]:
+        options_cache = kwargs["options_cache"]
+        assert kwargs["type"] is not None, "layer type not specified: forward/backward"
+        options = options_cache[kwargs["type"]]
+        logger.info("Tuned kernel options found, using those options")
 
     if options is None:
         options = Options("naive")
-        logger.warning("No mapping options supplied, 'naive' options will be used and will likely have bad performance.")
+        logger.warning("No mapping options passed, 'naive' options will be used and will likely have bad performance. See help(your_layer.__call__) for how to set options.")
     if not isinstance(options, Options):
         options = Options(options)
     return options
@@ -112,11 +119,36 @@ def validate_input(*inputs):
             "Incorrect input type: One of the inputs is not a tensor / Variable"
 
 
+# Autotuner helper function
 def validate_autotuner_input(*inputs):
     # for autotuning, we accept tensors, Variable, tuple as inputs
     for inp in inputs:
         assert torch.is_tensor(inp) or isinstance(inp, Variable) or isinstance(inp, tuple), \
             "Incorrect input type: One of the inputs is not a tensor/Variable/tuple"
+
+
+# Autotuner helper function
+def get_options_from_kwargs_and_tuner_cache(name, cache_file, options_cache, *inputs, **kwargs):
+    options = None
+    if "options" in kwargs and kwargs["options"] is not None:
+        options = kwargs["options"]
+        assert "type" in kwargs, "tuning layer type not specified: forward/backward"
+        # if we pass separate options for forward/backward, we use them otherwise
+        # use the same options
+        if isinstance(options, list) and len(options) == 2:
+            options = options[0] if kwargs["type"] == "forward" else options[1]
+    elif cache_file and isinstance(kwargs["cache"], str):
+        options = get_options_from_cache_file(name, *inputs, **kwargs)
+    elif options_cache and kwargs["type"] in options_cache and options_cache[kwargs["type"]] is not None:
+        options = options_cache[kwargs["type"]]
+        logger.info("Kernel was previously tuned, seeding the current tuning with those options")
+
+    if options is None:
+        options = Options("naive")
+        logger.warning("Using 'naive' options for autotuning. See help(your_layer.autotune) for how to set options.")
+    if not isinstance(options, Options):
+        options = Options(options)
+    return options
 
 ###############################################################################
 # TC autotuner class - ATen
@@ -139,6 +171,9 @@ class TcAutotuner(object):
         tuner_min_launch_total_threads=64,
         **kwargs
     ):
+        # tuner_cache will look like:
+        # hash_key -> {"forward": options1, "backward": options2}
+        self.tuner_cache = {}
         self.kwargs = kwargs
         self.tc_lang = tc_lang
         self.autotuner = ATenAutotuner(tc_lang)
@@ -180,25 +215,33 @@ class TcAutotuner(object):
         options = mapping_options
         if not isinstance(options, Options):
             options = Options(options)
-        best_options = self.autotuner.tune(
-            cache_file, tc_name, inputs, options, [options]
-        )
+        best_options = self.autotuner.tune(cache_file, tc_name, inputs, options, [options])
         return best_options
 
     def autotune(self, *inputs, **kwargs):
         input_tensors = get_tensors(list(inputs))
-
         kwargs.update(self.kwargs)
         name, backward_name = get_tc_names_from_kwargs(**kwargs)
         kwargs.pop("name", None)
         backward = True if backward_name is not None else False
+        hash_key = get_tc_hash_key(name, *input_tensors)
 
+        # lookup for the options in the cache. Whenever we make the call to
+        # autotune, tuning must happen. But if the kernel has been tuned earlier
+        # then we can use previous options to seed the tuning.
+        if hash_key in self.tuner_cache:
+            options_cache = self.tuner_cache[hash_key]
+        else:
+            options_cache = {}
+
+        # we give priority to the options user might have passed via file, or
+        # Options object.
         cache_file = ""
-        if "cache" in kwargs:
-            if isinstance(kwargs["cache"], bool) and kwargs["cache"]:
+        if "cache" in kwargs and kwargs["cache"]:
+            if isinstance(kwargs["cache"], bool):
                 hash_key = get_tc_hash_key(name, *input_tensors)
                 cache_file = "/tmp/{}_{}".format(hash_key, str(uuid.uuid4()))
-            elif isinstance(kwargs["cache"], str) and kwargs["cache"] != "":
+            elif isinstance(kwargs["cache"], str):
                 cache_file = kwargs["cache"]
             logger.info('Autotuning cache will be saved to: {}.cuda/options'.format(cache_file))
         else:
@@ -206,15 +249,18 @@ class TcAutotuner(object):
 
         # we will first run the autotuning on the forward layer, the inputs are given
         # for that, we will tune those
-        if "options" in kwargs and kwargs["options"] is not None:
-            options = kwargs["options"]
-        else:
-            options = Options("naive")
-            logger.warning("Using naive options for autotuning")
+        kwargs["type"] = "forward"
+        # we pass this tuner object so we can load from file without having to
+        # create special object
+        kwargs["tuner"] = self.autotuner
+        options = get_options_from_kwargs_and_tuner_cache(name, cache_file, options_cache, *input_tensors, **kwargs)
         forward_best_options = self.tune_and_store(
             name, input_tensors, mapping_options=options, cache_file=cache_file
         )
+        # update the cache with the options
+        options_cache["forward"] = forward_best_options
         if not backward:
+            self.tuner_cache[hash_key] = options_cache
             return forward_best_options
 
         # now, we have to tune the backward layer, for that, we need to run
@@ -222,8 +268,14 @@ class TcAutotuner(object):
         logger.info('Autotuning the backward layer now')
         cu = TcCompilationUnit()
         cu.define(self.tc_lang)
-        kwargs["tuner"] = self.autotuner
-        outputs = cu.compile_and_run(name, input_tensors, **kwargs)
+
+        if "options" in kwargs:
+            orig_options = kwargs["options"]
+            kwargs["options"] = forward_best_options
+            outputs = cu.compile_and_run(name, input_tensors, **kwargs)
+            kwargs["options"] = orig_options
+        else:
+            outputs = cu.compile_and_run(name, input_tensors, options=forward_best_options, **kwargs)
         # now that we have the outputs of the forward pass, we have the inputs
         # for the backward layer and we can now tune the backward layer
         reorder_function = kwargs["reorder_function"] if "reorder_function" in kwargs else None
@@ -231,12 +283,18 @@ class TcAutotuner(object):
         if reorder_function is not None:
             rearranged_outputs = reorder_function(list(outputs))
         inputs = make_contiguous(unpack_variables(input_tensors + list(rearranged_outputs)))
+
         if cache_file:
             cache_file = cache_file + "_backward"
             logger.info('Backwards autotuning cache will be saved to: {}.cuda/options'.format(cache_file))
+        kwargs["type"] = "backward"
+        options = get_options_from_kwargs_and_tuner_cache(backward_name, cache_file, options_cache, *inputs, **kwargs)
         backward_best_options = self.tune_and_store(
             backward_name, inputs, mapping_options=options, cache_file=cache_file
         )
+        # update the cache with the options
+        options_cache["backward"] = backward_best_options
+        self.tuner_cache[hash_key] = options_cache
         return [forward_best_options, backward_best_options]
 
 
@@ -294,9 +352,7 @@ class TcUnit(object):
         self.cu.define(lang)
         self.kwargs_define = kwargs_define
         self.lang = lang
-        self.tuner = None
-        # TODO: we should build a tuner cache here which looks like:
-        # hash_key -> options
+        self.tuner = None   # this tuner maintains a cache for kernels/input sizes tuned so far
 
     def __call__(self, *inputs, **kwargs):
         r"""Runs the define TC language on given inputs.
@@ -334,9 +390,13 @@ class TcUnit(object):
                      tensors/Variables beforehand. Most common use case is to
                      reuse output from a previous operation.
 
-            cache (optional): A string denoting the absolute filepath which contains
-                     the mapping options for the kernel. Such file can be created
-                     by running autotuning.
+            cache (optional, string): A string denoting the absolute filepath which contains
+                     the mapping options for the kernel. Such file can be created by running
+                     autotuning.
+
+                     If :attr:`training`=True, then the backward options will be obtained
+                     from file cache + '_backward'. For the backward, separate filename
+                     is not accepted for now.
 
             grid (int 3D list): If :attr:`inject_kernel` is `True`, then user
                   needs to specify the kernel grid options for running it. TC
@@ -375,6 +435,13 @@ class TcUnit(object):
         backward = True if backward_name is not None else False
 
         hash_key = get_tc_hash_key(name, *inputs)
+
+        if self.tuner and self.tuner.tuner_cache and hash_key in self.tuner.tuner_cache:
+            options_cache = self.tuner.tuner_cache[hash_key]
+        else:
+            options_cache = {}
+
+        kwargs["options_cache"] = options_cache
         if hash_key in self.cu.compilation_cache:
             tc_info = self.cu.compilation_cache[hash_key]
         else:
@@ -412,13 +479,18 @@ class TcUnit(object):
                      tune kernel on. The inputs should be passed in the order they
                      are also passed in the definition of TC language.
 
-            cache (optional, bool or string): Set this to True if you want to
-                    save the autotuned options for later use (for example in running the kernel).
-                    If set to true, the cache file will look like ""/tmp/kernel_name_input_sizes_uuid"
+            cache (optional, bool or string):
+                    bool: Set this to True if you want to save the autotuned options
+                    for later use (for example in running the kernel). If set to
+                    true, the cache file will look like "/tmp/kernel_name_input_sizes_uuid"
 
-                    Set this to the filepath where you want to save the options.
+                    string: Set this to the filepath where you want to save the options.
                     Default is None.
 
+                    If a string is passed and :attr:`training`=True, then the
+                    options for backward kernel will be saved to
+                    filepath -> cache_file + '_backward' i.e. prefix '_backward'
+                    will be appended.
 
             options (optional):  Kernel mapping options of type `Options`. These options
                      provide mapping for kernel like grid, blocks, memory etc. It
@@ -471,6 +543,8 @@ class TcUnit(object):
 
 
         Returns: Object of type `Options` that can be directly used to run the kernel.
+                 If :attr:`training`=True, then the list of size two containing
+                 forward kernel options and backward options will be returned.
 
         Example:
                 >>> LANG = MATMUL_LANG

@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update
 
-RUN apt-get install -y --no-install-recommends make git ssh realpath wget unzip cmake3
+RUN apt-get install -y --no-install-recommends make git ssh realpath wget unzip cmake3 vim
 RUN apt-get install -y --no-install-recommends libgoogle-glog-dev libyaml-dev
 RUN apt-get install -y --no-install-recommends libgtest-dev libz-dev libgmp3-dev
 RUN apt-get install -y --no-install-recommends automake libtool valgrind subversion
@@ -15,6 +15,7 @@ RUN cmake --version
 # GCC 4.8.*
 RUN add-apt-repository ppa:ubuntu-toolchain-r/test
 RUN apt-get update
+RUN apt-get install -y --no-install-recommends libcilkrts5
 RUN apt-get install -y --no-install-recommends gcc-4.8 g++-4.8
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
 RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
